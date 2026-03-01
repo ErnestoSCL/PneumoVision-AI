@@ -140,6 +140,29 @@ custom_css = """
 .footer-text a:hover {
     text-decoration: underline;
 }
+
+/* 📱 Optimizaciones y Adaptabilidad para Dispositivos Móviles (Responsive) */
+@media screen and (max-width: 768px) {
+    .gradio-container {
+        padding: 1rem 0.5rem !important;
+        padding-top: 1rem !important;
+    }
+    
+    #custom-image img {
+        max-height: 300px !important;
+    }
+    
+    #report-box {
+        padding: 1rem !important;
+        margin-top: 0.5rem !important;
+    }
+
+    .footer-text {
+        margin-top: 1.5rem !important;
+        padding-top: 1rem !important;
+        font-size: 0.85em !important;
+    }
+}
 """
 
 with gr.Blocks(theme=theme, css=custom_css, title="AI Neumonía Detector") as iface:
