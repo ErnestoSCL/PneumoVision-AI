@@ -42,22 +42,25 @@ def analyze_xray(image, patient_name, patient_age, symptoms, threshold):
     probability_pneumonia = float(prediction[0][0])
     probability_normal = 1.0 - probability_pneumonia
     
-    # Formateo de las salidas visuales
-    confidences = {
-        "Neumonía": probability_pneumonia,
-        "Normal": probability_normal
-    }
-    
     # Diagnóstico basado en el umbral personalizado
     if probability_pneumonia >= threshold:
         diagnosis = "NEUMONÍA DETECTADA"
         color = "#ef4444" # Rojo
+        # Forzar que visualmente la barra de Neumonía gane en el panel top_classes de Gradio
+        display_pneumonia = max(probability_pneumonia, 0.51)
+        display_normal = 1.0 - display_pneumonia
     else:
         diagnosis = "NORMAL (Sin evidencia clara de neumonía)"
         color = "#22c55e" # Verde
+        # Forzar que visualmente la barra de Normal gane en el panel top_classes de Gradio
+        display_normal = max(probability_normal, 0.51)
+        display_pneumonia = 1.0 - display_normal
         
-    # Recalibración visual obligada de la barra para Gradio en base al threshold si se desea forzar visualmente, 
-    # pero mantener las probabilidades brutas reales es éticamente más correcto en temas médicos.
+    # Formateo de las salidas visuales usando los valores recalibrados para sincronía visual
+    confidences = {
+        "Neumonía": display_pneumonia,
+        "Normal": display_normal
+    }
         
     # Generación de informe
     report = f"### Informe Radiológico Preliminar\n"
@@ -96,6 +99,27 @@ custom_css = """
 .gradio-container {
     max-width: 1200px !important;
     margin: auto !important;
+    padding-top: 2rem !important;
+}
+
+/* Forzar que la imagen no se vea aplastada y mantenga su proporción natural */
+#custom-image img {
+    object-fit: contain !important;
+    max-height: 450px !important;
+}
+
+/* Separación del contenedor del informe con padding y fondo translúcido */
+#report-box {
+    padding: 1.5rem !important;
+    background-color: rgba(30, 41, 59, 0.3) !important;
+    border-radius: 8px !important;
+    border: 1px solid #334155 !important;
+    margin-top: 1rem !important;
+}
+
+/* Ocultar el texto duro en ingles "Examples" generado por Gradio */
+#casos-prueba-box > div > span, #casos-prueba-box .label-text {
+    display: none !important;
 }
 
 /* Estilizar el pie de página profesional */
@@ -126,30 +150,31 @@ with gr.Blocks(theme=theme, css=custom_css, title="AI Neumonía Detector") as if
         """
     )
     
-    with gr.Row():
-        # Columna Izquierda: Entradas (Inputs)
-        with gr.Column(scale=1):
-            gr.Markdown("### 1. Datos Clínicos (Opcional)")
-            patient_name = gr.Textbox(label="Nombre del Paciente", placeholder="Ej. Juan Pérez")
-            with gr.Row():
-                patient_age = gr.Number(label="Edad", precision=0)
-                symptoms = gr.Textbox(label="Síntomas principales")
-            
-            gr.Markdown("### 2. Imagen Radiológica")
-            image_input = gr.Image(type="pil", label="Cargar Radiografía de Tórax")
+    with gr.Row(equal_height=False):
+        # Columna Izquierda: Imagen y Controles
+        with gr.Column(scale=4):
+            gr.Markdown("### 1. Imagen Radiológica")
+            image_input = gr.Image(type="pil", label="Cargar Radiografía de Tórax", elem_id="custom-image")
             
             with gr.Accordion("Configuración Avanzada", open=False):
-                gr.Markdown("Un umbral más bajo detectará más neumonías (alta sensibilidad), pero puede dar más falsas alarmas (falsos positivos).")
+                gr.Markdown("Un umbral más bajo detectará más neumonías (alta sensibilidad), pero puede dar falsos positivos.")
                 threshold_slider = gr.Slider(minimum=0.1, maximum=0.9, value=0.5, step=0.05, 
-                                             label="Umbral de Alarma de Neumonía (Threshold)")
+                                             label="Umbral de Alarma de Neumonía")
             
-            analyze_btn = gr.Button("Analizar Radiografía", variant="primary")
+            analyze_btn = gr.Button("Analizar Radiografía", variant="primary", size="lg")
             
-        # Columna Derecha: Salidas (Outputs)
-        with gr.Column(scale=1):
+        # Columna Derecha: Paciente y Resultados
+        with gr.Column(scale=5):
+            gr.Markdown("### 2. Datos Clínicos (Opcional)")
+            with gr.Row():
+                patient_name = gr.Textbox(label="Nombre del Paciente", placeholder="Ej. Juan Pérez")
+                patient_age = gr.Number(label="Edad", precision=0)
+            symptoms = gr.Textbox(label="Síntomas principales", lines=2)
+            
             gr.Markdown("### 3. Resultados del Análisis por IA")
-            label_output = gr.Label(label="Probabilidad de Diagnóstico", num_top_classes=2)
-            report_output = gr.Markdown(label="Informe Generado")
+            with gr.Group():
+                label_output = gr.Label(label="Diagnóstico Visual (Ajustado por Umbral)", num_top_classes=2)
+                report_output = gr.Markdown(label="Informe Generado", elem_id="report-box")
 
     # Acciones de la interfaz
     analyze_btn.click(
@@ -165,7 +190,9 @@ with gr.Blocks(theme=theme, css=custom_css, title="AI Neumonía Detector") as if
             inputs=[image_input, patient_name, patient_age, symptoms, threshold_slider],
             outputs=[label_output, report_output],
             fn=analyze_xray,
-            cache_examples=False
+            cache_examples=False,
+            elem_id="casos-prueba-box",
+            label=""
         )
 
     # --- Footer Profesional ---
