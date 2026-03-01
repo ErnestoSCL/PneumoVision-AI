@@ -1,0 +1,142 @@
+import tensorflow as tf
+from tensorflow import keras
+from PIL import Image
+import numpy as np
+import gradio as gr
+import os
+
+# --- Configuración de Rutas ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(BASE_DIR, 'cnn_neumonia.keras')
+IMG_HEIGHT = 64
+IMG_WIDTH = 64
+
+# --- 1. Cargar el modelo con validación ---
+try:
+    model = keras.models.load_model(model_path)
+    print(f"✅ Modelo cargado exitosamente desde: {model_path}")
+except Exception as e:
+    print(f"❌ Error crítico al cargar el modelo: {e}")
+    print("Asegúrate de que el archivo 'cnn_neumonia.keras' esté en la misma carpeta que este script.")
+    model = None # Prevención de cuelgues si no encuentra el modelo
+
+# --- 2. Funciones de Procesamiento ---
+def preprocess_image_for_prediction(image: Image.Image, target_size=(IMG_HEIGHT, IMG_WIDTH)):
+    img = image.convert('RGB')
+    img = img.resize(target_size)
+    img_array = np.array(img)
+    img_array = np.expand_dims(img_array, axis=0) 
+    img_array = img_array / 255.0                
+    return img_array
+
+def analyze_xray(image, patient_name, patient_age, symptoms, threshold):
+    if image is None:
+        return None, "⚠️ Por favor, carga una imagen de radiografía primero."
+    if model is None:
+        return None, "⚠️ El modelo no está cargado correctamente."
+
+    processed_image = preprocess_image_for_prediction(image)
+    prediction = model.predict(processed_image, verbose=0)
+    
+    # Asumiendo validación binaria (salida sigmoide)
+    probability_pneumonia = float(prediction[0][0])
+    probability_normal = 1.0 - probability_pneumonia
+    
+    # Formateo de las salidas visuales
+    confidences = {
+        "Neumonía": probability_pneumonia,
+        "Normal": probability_normal
+    }
+    
+    # Diagnóstico basado en el umbral personalizado
+    if probability_pneumonia >= threshold:
+        diagnosis = "🚨 **Neumonía Detectada**"
+        color = "#ef4444" # Rojo
+    else:
+        diagnosis = "✅ **Normal** (Sin evidencia clara de neumonía)"
+        color = "#22c55e" # Verde
+        
+    # Generación de informe
+    report = f"### 📋 Informe Radiológico Preliminar\n"
+    report += f"**Paciente:** {patient_name if patient_name else 'No especificado'} | **Edad:** {patient_age if patient_age else 'N/A'}\n"
+    report += f"**Síntomas:** {symptoms if symptoms else 'Ninguno indicado'}\n\n"
+    report += f"---\n\n"
+    report += f"**Diagnóstico Asistido:** <span style='color:{color}; font-size:1.1em;'>{diagnosis}</span>\n\n"
+    report += f"**Confianza del modelo (Neumonía):** {probability_pneumonia:.2%}\n"
+    report += f"**Umbral utilizado:** {threshold:.2f}\n\n"
+    report += f"> *Aviso: Este es un análisis preliminar generado por IA y no sustituye el criterio de un médico radiólogo profesional.*"
+
+    return confidences, report
+
+# --- 3. Interfaz de Gradio (Usando Blocks para un Dashboard Médico) ---
+
+# Preparamos variables de ejemplo
+example_list = [
+    [os.path.join(BASE_DIR, "pneumonia1.jpeg"), "Juan Pérez", 45, "Tos con flema, fiebre alta", 0.5],
+    [os.path.join(BASE_DIR, "normal1.jpeg"), "María García", 30, "Chequeo de rutina", 0.5],
+    [os.path.join(BASE_DIR, "pneumonia2.jpeg"), "Carlos López", 60, "Dificultad para respirar", 0.5],
+]
+existing_examples = [ex for ex in example_list if os.path.exists(ex[0])]
+
+# Tema visual suave y clínico
+theme = gr.themes.Soft(
+    primary_hue="blue",
+    secondary_hue="slate",
+).set(
+    button_primary_background_fill="*primary_500",
+    button_primary_background_fill_hover="*primary_600",
+)
+
+with gr.Blocks(theme=theme, title="AI Neumonía Detector") as iface:
+    gr.Markdown(
+        """
+        # 🩺 Asistente de Diagnóstico de Neumonía por Radiografía
+        Esta herramienta de apoyo clínico utiliza Deep Learning para analizar radiografías de tórax (CXR) estructurales y estimar la probabilidad de neumonía. 
+        """
+    )
+    
+    with gr.Row():
+        # Columna Izquierda: Entradas (Inputs)
+        with gr.Column(scale=1):
+            gr.Markdown("### 1. Datos Clínicos (Opcional)")
+            patient_name = gr.Textbox(label="Nombre del Paciente", placeholder="Ej. Juan Pérez")
+            with gr.Row():
+                patient_age = gr.Number(label="Edad", precision=0)
+                symptoms = gr.Textbox(label="Síntomas principales")
+            
+            gr.Markdown("### 2. Imagen Radiológica")
+            image_input = gr.Image(type="pil", label="Cargar Radiografía de Tórax")
+            
+            with gr.Accordion("⚙️ Configuración Avanzada", open=False):
+                gr.Markdown("Un umbral más bajo detectará más neumonías (alta sensibilidad), pero puede dar más falsas alarmas (falsos positivos).")
+                threshold_slider = gr.Slider(minimum=0.1, maximum=0.9, value=0.5, step=0.05, 
+                                             label="Umbral de Alarma de Neumonía")
+            
+            analyze_btn = gr.Button("🔍 Analizar Radiografía", variant="primary")
+            
+        # Columna Derecha: Salidas (Outputs)
+        with gr.Column(scale=1):
+            gr.Markdown("### 3. Resultados del Análisis por IA")
+            label_output = gr.Label(label="Probabilidad de Diagnóstico", num_top_classes=2)
+            report_output = gr.Markdown(label="Informe Generado")
+
+    # Acciones de la interfaz
+    analyze_btn.click(
+        fn=analyze_xray,
+        inputs=[image_input, patient_name, patient_age, symptoms, threshold_slider],
+        outputs=[label_output, report_output]
+    )
+    
+    if existing_examples:
+        gr.Markdown("### 🗂️ Casos de Prueba")
+        gr.Examples(
+            examples=existing_examples,
+            inputs=[image_input, patient_name, patient_age, symptoms, threshold_slider],
+            outputs=[label_output, report_output],
+            fn=analyze_xray,
+            cache_examples=False
+        )
+
+# --- 4. Lanzamiento ---
+if __name__ == "__main__":
+    iface.launch(debug=True, share=True) # Mantengo share=True como pedías antes para links públicos
