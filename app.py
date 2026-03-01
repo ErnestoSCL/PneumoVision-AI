@@ -50,18 +50,21 @@ def analyze_xray(image, patient_name, patient_age, symptoms, threshold):
     
     # Diagnóstico basado en el umbral personalizado
     if probability_pneumonia >= threshold:
-        diagnosis = "🚨 **Neumonía Detectada**"
+        diagnosis = "NEUMONÍA DETECTADA"
         color = "#ef4444" # Rojo
     else:
-        diagnosis = "✅ **Normal** (Sin evidencia clara de neumonía)"
+        diagnosis = "NORMAL (Sin evidencia clara de neumonía)"
         color = "#22c55e" # Verde
         
+    # Recalibración visual obligada de la barra para Gradio en base al threshold si se desea forzar visualmente, 
+    # pero mantener las probabilidades brutas reales es éticamente más correcto en temas médicos.
+        
     # Generación de informe
-    report = f"### 📋 Informe Radiológico Preliminar\n"
+    report = f"### Informe Radiológico Preliminar\n"
     report += f"**Paciente:** {patient_name if patient_name else 'No especificado'} | **Edad:** {patient_age if patient_age else 'N/A'}\n"
     report += f"**Síntomas:** {symptoms if symptoms else 'Ninguno indicado'}\n\n"
     report += f"---\n\n"
-    report += f"**Diagnóstico Asistido:** <span style='color:{color}; font-size:1.1em;'>{diagnosis}</span>\n\n"
+    report += f"**Diagnóstico Asistido:** <span style='color:{color}; font-weight:bold; font-size:1.1em;'>{diagnosis}</span>\n\n"
     report += f"**Confianza del modelo (Neumonía):** {probability_pneumonia:.2%}\n"
     report += f"**Umbral utilizado:** {threshold:.2f}\n\n"
     report += f"> *Aviso: Este es un análisis preliminar generado por IA y no sustituye el criterio de un médico radiólogo profesional.*"
@@ -118,7 +121,7 @@ custom_css = """
 with gr.Blocks(theme=theme, css=custom_css, title="AI Neumonía Detector") as iface:
     gr.Markdown(
         """
-        # 🩺 Asistente de Diagnóstico de Neumonía por Radiografía
+        # Asistente de Diagnóstico de Neumonía por Radiografía
         Esta herramienta de apoyo clínico utiliza Deep Learning para analizar radiografías de tórax (CXR) estructurales y estimar la probabilidad de neumonía. 
         """
     )
@@ -135,12 +138,12 @@ with gr.Blocks(theme=theme, css=custom_css, title="AI Neumonía Detector") as if
             gr.Markdown("### 2. Imagen Radiológica")
             image_input = gr.Image(type="pil", label="Cargar Radiografía de Tórax")
             
-            with gr.Accordion("⚙️ Configuración Avanzada", open=False):
+            with gr.Accordion("Configuración Avanzada", open=False):
                 gr.Markdown("Un umbral más bajo detectará más neumonías (alta sensibilidad), pero puede dar más falsas alarmas (falsos positivos).")
                 threshold_slider = gr.Slider(minimum=0.1, maximum=0.9, value=0.5, step=0.05, 
-                                             label="Umbral de Alarma de Neumonía")
+                                             label="Umbral de Alarma de Neumonía (Threshold)")
             
-            analyze_btn = gr.Button("🔍 Analizar Radiografía", variant="primary")
+            analyze_btn = gr.Button("Analizar Radiografía", variant="primary")
             
         # Columna Derecha: Salidas (Outputs)
         with gr.Column(scale=1):
@@ -156,7 +159,7 @@ with gr.Blocks(theme=theme, css=custom_css, title="AI Neumonía Detector") as if
     )
     
     if existing_examples:
-        gr.Markdown("### 🗂️ Casos de Prueba")
+        gr.Markdown("### Casos de Prueba")
         gr.Examples(
             examples=existing_examples,
             inputs=[image_input, patient_name, patient_age, symptoms, threshold_slider],
@@ -170,8 +173,8 @@ with gr.Blocks(theme=theme, css=custom_css, title="AI Neumonía Detector") as if
         """
         <div class="footer-text">
             <strong>Desarrollado por:</strong> Ernesto Castro Lozano<br>
-            ✉️ Contacto: <a href="mailto:ernestosaniel123@gmail.com">ernestosaniel123@gmail.com</a> | 
-            🔗 LinkedIn: <a href="https://www.linkedin.com/in/ernesto-saniel-castro-lozano-96ba2b268" target="_blank">Ernesto Saniel Castro Lozano</a>
+            Contacto: <a href="mailto:ernestosaniel123@gmail.com">ernestosaniel123@gmail.com</a> | 
+            LinkedIn: <a href="https://www.linkedin.com/in/ernesto-saniel-castro-lozano-96ba2b268" target="_blank">Ernesto Saniel Castro Lozano</a>
         </div>
         """
     )
