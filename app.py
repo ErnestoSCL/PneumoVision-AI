@@ -95,11 +95,18 @@ theme = gr.themes.Soft(
 
 # CSS personalizado para centrar y darle una apariencia más compacta profesional
 custom_css = """
+/* Evitar desbordamiento horizontal en pantallas móviles */
+body, html {
+    overflow-x: hidden !important;
+}
+
 /* Limitar el ancho máximo de la aplicación y centrarla */
 .gradio-container {
     max-width: 1200px !important;
     margin: auto !important;
     padding-top: 2rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 /* Forzar que la imagen no se vea aplastada y mantenga su proporción natural */
@@ -117,7 +124,11 @@ custom_css = """
     margin-top: 1rem !important;
 }
 
-/* Ocultar el texto duro en ingles "Examples" generado por Gradio */
+/* Permitir scroll horizontal en los ejemplos y ocultar el texto en ingles */
+#casos-prueba-box {
+    overflow-x: auto !important;
+    max-width: 100% !important;
+}
 #casos-prueba-box > div > span, #casos-prueba-box .label-text {
     display: none !important;
 }
@@ -131,6 +142,7 @@ custom_css = """
     border-top: 1px solid #e2e8f0;
     font-size: 0.95em;
     line-height: 1.6;
+    word-wrap: break-word !important; /* Enlaces largos no romperan la pantalla */
 }
 .footer-text a {
     color: #3b82f6;
@@ -165,7 +177,7 @@ custom_css = """
 }
 """
 
-with gr.Blocks(theme=theme, css=custom_css, title="AI Neumonía Detector") as iface:
+with gr.Blocks(title="AI Neumonía Detector") as iface:
     gr.Markdown(
         """
         # Asistente de Diagnóstico de Neumonía por Radiografía
@@ -175,7 +187,7 @@ with gr.Blocks(theme=theme, css=custom_css, title="AI Neumonía Detector") as if
     
     with gr.Row(equal_height=False):
         # Columna Izquierda: Imagen y Controles
-        with gr.Column(scale=4):
+        with gr.Column(scale=4, min_width=280):
             gr.Markdown("### 1. Imagen Radiológica")
             image_input = gr.Image(type="pil", label="Cargar Radiografía de Tórax", elem_id="custom-image")
             
@@ -187,7 +199,7 @@ with gr.Blocks(theme=theme, css=custom_css, title="AI Neumonía Detector") as if
             analyze_btn = gr.Button("Analizar Radiografía", variant="primary", size="lg")
             
         # Columna Derecha: Paciente y Resultados
-        with gr.Column(scale=5):
+        with gr.Column(scale=5, min_width=280):
             gr.Markdown("### 2. Datos Clínicos (Opcional)")
             with gr.Row():
                 patient_name = gr.Textbox(label="Nombre del Paciente", placeholder="Ej. Juan Pérez")
@@ -231,4 +243,4 @@ with gr.Blocks(theme=theme, css=custom_css, title="AI Neumonía Detector") as if
     
 # --- 4. Lanzamiento ---
 if __name__ == "__main__":
-    iface.launch(debug=True, share=True) # Mantengo share=True como pedías antes para links públicos
+    iface.launch(debug=True, share=True, theme=theme, css=custom_css) # Mantengo share=True como pedías antes para links públicos
