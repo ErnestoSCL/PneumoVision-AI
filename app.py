@@ -87,7 +87,35 @@ theme = gr.themes.Soft(
     button_primary_background_fill_hover="*primary_600",
 )
 
-with gr.Blocks(theme=theme, title="AI Neumonía Detector") as iface:
+# CSS personalizado para centrar y darle una apariencia más compacta profesional
+custom_css = """
+/* Limitar el ancho máximo de la aplicación y centrarla */
+.gradio-container {
+    max-width: 1200px !important;
+    margin: auto !important;
+}
+
+/* Estilizar el pie de página profesional */
+.footer-text {
+    text-align: center;
+    color: #64748b;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    font-size: 0.95em;
+    line-height: 1.6;
+}
+.footer-text a {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 500;
+}
+.footer-text a:hover {
+    text-decoration: underline;
+}
+"""
+
+with gr.Blocks(theme=theme, css=custom_css, title="AI Neumonía Detector") as iface:
     gr.Markdown(
         """
         # 🩺 Asistente de Diagnóstico de Neumonía por Radiografía
@@ -137,6 +165,17 @@ with gr.Blocks(theme=theme, title="AI Neumonía Detector") as iface:
             cache_examples=False
         )
 
+    # --- Footer Profesional ---
+    gr.HTML(
+        """
+        <div class="footer-text">
+            <strong>Desarrollado por:</strong> Ernesto Castro Lozano<br>
+            ✉️ Contacto: <a href="mailto:ernestosaniel123@gmail.com">ernestosaniel123@gmail.com</a> | 
+            🔗 LinkedIn: <a href="https://www.linkedin.com/in/ernesto-saniel-castro-lozano-96ba2b268" target="_blank">Ernesto Saniel Castro Lozano</a>
+        </div>
+        """
+    )
+    
 # --- 4. Lanzamiento ---
 if __name__ == "__main__":
     iface.launch(debug=True, share=True) # Mantengo share=True como pedías antes para links públicos
