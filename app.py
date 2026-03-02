@@ -188,8 +188,8 @@ with gr.Blocks(title="AI Neumonía Detector") as iface:
     with gr.Row(equal_height=False):
         # Columna Izquierda: Imagen y Controles
         with gr.Column(scale=4, min_width=280):
-            gr.Markdown("### 1. Imagen Radiológica")
-            image_input = gr.Image(type="pil", label="Cargar Radiografía de Tórax", elem_id="custom-image")
+            gr.Markdown("### 1. Imagen Radiológica (Cargar Radiografía de Tórax)")
+            image_input = gr.Image(type="pil", show_label=False, elem_id="custom-image")
             
             with gr.Accordion("Configuración Avanzada", open=False):
                 gr.Markdown("Un umbral más bajo detectará más neumonías (alta sensibilidad), pero puede dar falsos positivos.")
@@ -206,10 +206,10 @@ with gr.Blocks(title="AI Neumonía Detector") as iface:
                 patient_age = gr.Number(label="Edad", precision=0)
             symptoms = gr.Textbox(label="Síntomas principales", lines=2)
             
-            gr.Markdown("### 3. Resultados del Análisis por IA")
+            gr.Markdown("### 3. Resultados del Análisis por IA (Diagnóstico Visual)")
             with gr.Group():
-                label_output = gr.Label(label="Diagnóstico Visual (Ajustado por Umbral)", num_top_classes=2)
-                report_output = gr.Markdown(label="Informe Generado", elem_id="report-box")
+                label_output = gr.Label(show_label=False, num_top_classes=2)
+                report_output = gr.Markdown(elem_id="report-box")
 
     # Acciones de la interfaz
     analyze_btn.click(
