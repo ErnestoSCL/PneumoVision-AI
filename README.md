@@ -1,4 +1,4 @@
-# 🫁 PneumoVision AI: Pediatric Pneumonia Detector
+# 🫁 PneumoVision AI: Pneumonia Detector
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.8+-blue?logo=python" alt="Python">
