@@ -1,45 +1,61 @@
 # 🫁 PneumoVision AI: Pediatric Pneumonia Detector
 
-PneumoVision AI is an intuitive, AI-powered clinical dashboard designed to assist medical professionals in the rapid and preliminary detection of pneumonia from chest X-ray images.
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.8+-blue?logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/TensorFlow-2.x-FF6F00?logo=tensorflow" alt="TensorFlow">
+  <img src="https://img.shields.io/badge/Gradio-UI-FF4B4B?logo=gradio" alt="Gradio">
+  <img src="https://img.shields.io/badge/Hugging%20Face-Spaces-FFD21E?logo=huggingface" alt="HF Spaces">
+</p>
+
+> **PneumoVision AI** is an intuitive, AI-powered clinical dashboard designed to assist medical professionals in the rapid and preliminary detection of pneumonia from chest X-ray images.
+
+### 🌐 [Live Demo en Hugging Face](https://huggingface.co/spaces/ErnestoRepos/neumonia_prediction)
+
+---
 
 ## ✨ Features
+
 - **Deep Learning Model:** Utilizes a Convolutional Neural Network (CNN) trained on chest X-rays to distinguish between normal lungs and pneumonia-affected lungs.
 - **Clinical Dashboard:** Features a clean, medical-grade web interface powered by Gradio Blocks.
 - **Adjustable Sensitivity Threshold:** Allows medical personnel to fine-tune the detection alarm threshold to balance sensitivity and specificity according to clinical needs.
 - **Patient Context Integration:** Optionally accepts patient data (name, age, symptoms) to generate a consolidated preliminary report.
 - **Real-Time Inference:** Instant visual feedback and confidence scores.
 
-## 🛠️ Technologies Used
-- **TensorFlow & Keras:** For CNN model inference and image array processing.
-- **Python 3:** Core programming language.
-- **Gradio:** For building the interactive web-based clinical dashboard.
-- **Pillow (PIL) & NumPy:** For image loading, normalization, and pre-processing.
+---
 
-## 🚀 How to Run Locally
+## 🛠️ Stack Tecnológico
 
-### Prerequisites
-Make sure you have Python 3.8+ installed. You will also need `pip` to install dependencies.
+| Herramienta | Uso |
+|-------------|-----|
+| **TensorFlow & Keras** | Inferencia del modelo CNN y procesamiento |
+| **Gradio** | Construcción de la interfaz y Dashboard Web |
+| **Python** | Lenguaje Principal |
+| **Pillow & NumPy** | Carga, normalización y preprocesamiento de imágenes |
 
-### Installation
+---
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/ErnestoSCL/PneumoVision-AI.git
-   cd PneumoVision-AI
-   ```
+## 🚀 Cómo correr localmente
 
-2. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-   *(Ensure you have `tensorflow` and `gradio` installed)*
+### Prerrequisitos
+Deberás tener **Python 3.8+** instalado.
 
-3. Run the application:
-   ```bash
-   python app.py
-   ```
+### Instalación
 
-4. Open your browser and navigate to the local URL provided in the terminal (usually `http://127.0.0.1:7860`).
+```bash
+# 1. Clonar este repositorio:
+git clone https://github.com/ErnestoSCL/PneumoVision-AI.git
+cd PneumoVision-AI
 
-## ⚠️ Disclaimer
-*This tool is a prototype and a preliminary AI-assisted analysis tool. It is not intended to replace professional medical advice, diagnosis, or treatment. Always seek the advice of a qualified radiologist or physician.*
+# 2. Instalar las dependencias requeridas (Keras, TensorFlow, Gradio):
+pip install -r requirements.txt
+
+# 3. Lanzar la aplicación
+python app.py
+```
+
+> **Abre tu navegador:** Ve a la URL local generada (usualmente `http://127.0.0.1:7860`).
+
+---
+
+## ⚠️ Disclaimer Médico
+*Reconocimiento médico automatizado: Esta herramienta es un prototipo y un asistente preliminar de IA. No está concebida para reemplazar el criterio, diagnóstico, o tratamiento de un profesional de la salud. Acuda siempre a un radiólogo o médico calificado.*
